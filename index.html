@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 62.5%;
+      }
+
+      body {
+        font-family: 'Roboto Slab', serif;
+        color: #fff;
+        background-color: #1a1a1a;
+      }
+
+      .container {
+        max-width: 70rem;
+        width: 100%;
+        padding: 2rem;
+        margin: auto;
+      }
+
+      .container h1 {
+        font-family: 'Pacifico', cursive;
+        font-size: 8rem;
+        text-align: center;
+        margin: 2rem 0;
+        color: #ffdd00;
+      }
+
+      .container p {
+        font-size: 3rem;
+        text-align: center;
+        margin: 2rem 0;
+        color: #bbb;
+      }
+
+      .game-box {
+        padding: 2rem;
+        margin: 15rem 0 2rem;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        background-color: #333;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        border-radius: 20px;
+      }
+
+      .figure {
+        display: block;
+        height: 35rem;
+        width: 20rem;
+        fill: transparent;
+        stroke: #ffdd00;
+        stroke-width: 6px;
+        stroke-linecap: round;
+        flex-shrink: 0;
+      }
+
+      .body-part {
+        display: none;
+      }
+
+      .content {
+        height: auto;
+        max-width: 50rem;
+        width: 100%;
+        flex-shrink: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .word {
+        font-size: 4rem;
+        list-style-type: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .letter {
+        text-align: center;
+        display: block;
+        height: 5rem;
+        width: 4rem;
+        margin-right: 1rem;
+        border-bottom: 6px #ffdd00 solid;
+        font-size: 3rem;
+        color: #fff;
+      }
+
+      .incorrect {
+        height: auto;
+        padding: 1rem;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .incorrect.visible {
+        display: flex;
+      }
+
+      .incorrect h2 {
+        display: inline-block;
+        padding: 0 0 0 4rem;
+        font-size: 2.5rem;
+        font-weight: 500;
+        color: #ffdd00;
+      }
+
+      .incorrect p {
+        font-size: 2.5rem;
+        display: inline-block;
+        margin: 0;
+        padding: 0 1rem;
+      }
+
+      .backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        z-index: 10;
+        display: none;
+      }
+
+      .backdrop.visible {
+        display: block;
+      }
+
+      .no-work {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        max-width: 40rem;
+        width: 75%;
+        padding: 2rem;
+        line-height: 1.6;
+        background-color: #333;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        border-radius: 20px;
+        display: none;
+      }
+
+      .no-work p {
+        font-size: 2.5rem;
+        text-align: center;
+        color: #ffdd00;
+      }
+
+      .final-msg {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        max-width: 40rem;
+        width: 75%;
+        padding: 2rem;
+        line-height: 1.6;
+        background-color: #333;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        border-radius: 20px;
+        display: none;
+        text-align: center;
+      }
+
+      .final-msg.visible {
+        display: flex;
+      }
+
+      .final-msg p {
+        font-size: 2.5rem;
+        margin: 0;
+        color: #ffdd00;
+      }
+
+      .final-msg .play {
+        font: inherit;
+        font-size: 2rem;
+        padding: 1.5rem 2rem;
+        cursor: pointer;
+        margin-top: 3rem;
+        background-color: #ffdd00;
+        border-radius: 12px;
+        color: #1a1a1a;
+        border: none;
+        outline: none;
+        transition: opacity 200ms ease-in;
+      }
+
+      @media (hover: hover) {
+        .final-msg .play:hover {
+          opacity: 0.85;
+        }
+      }
+
+      .indication {
+        border: 2px #ffdd00 solid;
+        border-radius: 12px;
+        background-color: #333;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-width: 40rem;
+        width: 75%;
+        margin: auto;
+        transform: translateY(100%);
+        transition: transform 200ms ease-in;
+      }
+
+      .indication.visible {
+        transform: translateY(-20%);
+      }
+
+      .indication p {
+        margin: 2rem;
+        font-size: 2.5rem;
+        color: #ffdd00;
+      }
+
+      @media (max-width: 600px) {
+        .game-box {
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .content {
+          height: auto;
+        }
+      }
+
+      @media (hover: none) {
+        .backdrop {
+          display: block;
+        }
+
+        .no-work {
+          display: flex;
+        }
+      }
+    </style>
+    <title>Word Game - Magpayo, Laurenze Daniel R</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Word Game</h1>
+      <p>Find the hidden word before the man gets hanged. Type a letter to start.</p>
+      <div class="game-box">
+        <svg class="figure">
+          <line x1="25%" y1="5%" x2="65%" y2="5%" />
+          <line x1="65%" y1="5%" x2="65%" y2="20%" />
+          <line x1="25%" y1="5%" x2="25%" y2="95%" />
+          <line x1="5%" y1="95%" x2="45%" y2="95%" />
+          <circle r="10%" cx="65%" cy="30%" class="body-part" />
+          <line x1="65%" y1="40%" x2="65%" y2="60%" class="body-part" />
+          <line x1="50%" y1="40%" x2="65%" y2="50%" class="body-part" />
+          <line x1="80%" y1="40%" x2="65%" y2="50%" class="body-part" />
+          <line x1="65%" y1="60%" x2="80%" y2="70%" class="body-part" />
+          <line x1="65%" y1="60%" x2="50%" y2="70%" class="body-part" />
+        </svg>
+        <div class="content">
+          <ul id="word" class="word"></ul>
+          <div id="incorrect" class="incorrect">
+            <h2>Incorrect:</h2>
+            <p></p>
+          </div>
+        </div>
+        <div id="backdrop" class="backdrop"></div>
+        <div id="no-work" class="no-work">
+          <p>This app doesn't work on touch screen devices.</p>
+        </div>
+        <div id="final-msg" class="final-msg">
+          <p id="msg-info" class="msg-info"></p>
+          <button id="play-again" class="play">Play Again</button>
+        </div>
+        <div id="indication" class="indication">
+          <p>You have already entered this letter</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      const word = document.getElementById('word');
+      const incorrect = document.getElementById('incorrect');
+      const incorrectLettersEl = document.querySelector('#incorrect p');
+      const backdrop = document.getElementById('backdrop');
+      const finalMsg = document.getElementById('final-msg');
+      const msgInfo = document.getElementById('msg-info');
+      const playBtn = document.getElementById('play');
+      const indication = document.getElementById('indication');
+      const bodyParts = document.getElementsByClassName('body-part');
+
+      // List of words
+      const wordList = [
+        'market',
+        'knock',
+        'smite',
+        'windy',
+        'coin',
+        'throw',
+        'silence',
+        'bluff',
+        'downfall',
+        'climb',
+        'lying',
+        'weaver',
+        'snob',
+        'kickoff',
+        'match',
+        'coat',
+        'emerald',
+        'coherent',
+        'multiple',
+        'square',
+      ];
+
+      let selectedWord = null;
+
+      let incorrectCount = 0;
+
+      const correctLetters = [];
+
+      const incorrectLetters = [];
+
+      function initializeWord() {
+        selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
+        const noOfLetters = selectedWord.length;
+        for (let i = 0; i < noOfLetters; i++) {
+          const listItem = document.createElement('li');
+          listItem.classList.add('letter');
+          word.append(listItem);
+        }
+      }
+
+      function displayIndication() {
+        indication.classList.add('visible');
+
+        setTimeout(() => {
+          indication.classList.remove('visible');
+        }, 2400);
+      }
+
+      function updateFigure() {
+        try {
+          bodyParts[incorrectCount].style.display = 'block';
+          incorrectCount++;
+        } catch (error) {}
+      }
+
+      function successState() {
+        setTimeout(() => {
+          backdrop.classList.add('visible');
+          finalMsg.classList.add('visible');
+          msgInfo.textContent = 'Hurrah! You won.';
+        }, 400);
+      }
+
+      function failureState() {
+        setTimeout(() => {
+          backdrop.classList.add('visible');
+          finalMsg.classList.add('visible');
+          msgInfo.textContent = `Oops! You lost. The right word is "${selectedWord}"`;
+        }, 400);
+      }
+
+      function check(ev) {
+        const letterElements = document.querySelectorAll('.word .letter');
+        const character = ev.key;
+
+        if (
+          !backdrop.classList.contains('visible') &&
+          !indication.classList.contains('visible') &&
+          ev.keyCode >= 65 &&
+          ev.keyCode <= 90
+        ) {
+          if (selectedWord.includes(character)) {
+            if (correctLetters.includes(character)) {
+              displayIndication();
+            } else {
+              correctLetters.push(character);
+              const indexes = [];
+              [...selectedWord].forEach((value, index) => {
+                if (value === character) {
+                  indexes.push(index);
+                }
+              });
+              indexes.forEach((value) => {
+                letterElements[value].textContent = character;
+              });
+            }
+          } else {
+            if (incorrectLetters.includes(character)) {
+              displayIndication();
+            } else {
+              incorrectLetters.push(character);
+              if (!incorrect.classList.contains('visible')) {
+                incorrect.classList.add('visible');
+              }
+              incorrectLettersEl.textContent = `${incorrectLetters.join(', ')}`;
+              updateFigure();
+            }
+          }
+        }
+
+        let formedWord = '';
+        letterElements.forEach((value) => {
+          formedWord += value.textContent;
+        });
+
+        if (formedWord === selectedWord) {
+          successState();
+        }
+
+        if (incorrectCount >= 6) {
+          failureState();
+        }
+      }
+
+      function startNewGame() {
+        selectedWord = null;
+        incorrectCount = 0;
+        correctLetters.splice(0);
+        incorrectLetters.splice(0);
+        word.innerHTML = '';
+        Array.from(bodyParts).forEach((value) => {
+          value.style.display = 'none';
+        });
+        incorrect.classList.remove('visible');
+        backdrop.classList.remove('visible');
+        finalMsg.classList.remove('visible');
+        initializeWord();
+      }
+
+      initializeWord();
+
+      window.addEventListener('keyup', check);
+      playBtn.addEventListener('click', startNewGame);
+    </script>
+  </body>
+</html>
